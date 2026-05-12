@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  # ── Production ───────────────────────────────────────────────────
+  web:
+    build:
+      context   : .
+      dockerfile: Dockerfile
+      target    : runtime
+    container_name: shopee-sentiment-web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+    restart: unless-stopped
+    healthcheck:
+      test    : ["CMD", "python", "-c",
+                 "import urllib.request; urllib.request.urlopen('http://localhost:5000/')"]
+      interval: 30s
+      timeout : 10s
+      retries : 3
+      start_period: 15s
+    networks:
+      - shopee-net
+
+  # ── Development (hot-reload) ──────────────────────────────────────
+  web-dev:
+    build:
+      context   : .
+      dockerfile: Dockerfile
+      target    : builder
+    container_name: shopee-sentiment-dev
+    command   : python app.py
+    ports:
+      - "5001:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    volumes:
+      - .:/app          # mount seluruh folder untuk hot-reload
+    networks:
+      - shopee-net
+    profiles:
+      - dev             # aktifkan: docker compose --profile dev up
+
+networks:
+  shopee-net:
+    driver: bridge
