@@ -1,3 +1,13 @@
+---
+title: CV Match App
+emoji: 🚀
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # 📄 CV-Match AI — Sistem Analisis & Pencocokan Karir Berbasis NLP
 
 CV-Match AI adalah aplikasi web cerdas berbasis Python dan Natural Language Processing (NLP) yang dirancang untuk menganalisis dokumen CV (PDF) pengguna secara otomatis dan mencocokkannya dengan berbagai peran pekerjaan industri secara semantik.
