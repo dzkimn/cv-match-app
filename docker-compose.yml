@@ -7,7 +7,7 @@ services:
       context   : .
       dockerfile: Dockerfile
       target    : runtime
-    container_name: shopee-sentiment-web
+    container_name: cv-match-web
     ports:
       - "5000:5000"
     environment:
@@ -22,7 +22,7 @@ services:
       retries : 3
       start_period: 15s
     networks:
-      - shopee-net
+      - cv-net
 
   # ── Development (hot-reload) ──────────────────────────────────────
   web-dev:
@@ -30,7 +30,7 @@ services:
       context   : .
       dockerfile: Dockerfile
       target    : builder
-    container_name: shopee-sentiment-dev
+    container_name: cv-match-dev
     command   : python app.py
     ports:
       - "5001:5000"
@@ -39,11 +39,15 @@ services:
       - FLASK_DEBUG=1
     volumes:
       - .:/app          # mount seluruh folder untuk hot-reload
+      - uploads_vol:/app/uploads # Volume mount untuk uploads agar tidak hilang saat reload container
     networks:
-      - shopee-net
+      - cv-net
     profiles:
       - dev             # aktifkan: docker compose --profile dev up
 
+volumes:
+  uploads_vol:
+
 networks:
-  shopee-net:
+  cv-net:
     driver: bridge

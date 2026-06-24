@@ -1,388 +1,191 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="ShopeeSentiment — Analisis sentimen ulasan produk Shopee berbasis AI/NLP" />
-  <title>{% block title %}ShopeeSentiment{% endblock %}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CV-Match AI{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4F46E5; /* Indigo 600 */
+            --primary-hover: #4338CA;
+            --secondary: #10B981; /* Emerald 500 */
+            --bg-color: #F3F4F6; /* Gray 100 */
+            --surface: #FFFFFF;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
 
-    :root {
-      --orange      : #EE4D2D;
-      --orange-dark : #C73B1E;
-      --orange-light: #FFF3F0;
-      --orange-mid  : #FF6B47;
-      --green       : #26AA99;
-      --green-light : #E8F8F6;
-      --yellow      : #FFA800;
-      --yellow-light: #FFF8E7;
-      --purple      : #7C3AED;
-      --purple-light: #F3EEFF;
-      --text        : #1A1A2E;
-      --text-muted  : #6B7280;
-      --bg          : #F8F9FB;
-      --white       : #FFFFFF;
-      --border      : #E5E7EB;
-      --shadow      : 0 4px 24px rgba(238,77,45,0.10);
-      --shadow-sm   : 0 2px 8px rgba(0,0,0,0.06);
-      --shadow-md   : 0 8px 32px rgba(0,0,0,0.10);
-      --radius      : 16px;
-      --radius-sm   : 10px;
-      --nav-h       : 64px;
-      --font-body   : 'Plus Jakarta Sans', sans-serif;
-      --font-display: 'Syne', sans-serif;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
-    html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    body {
-      font-family   : var(--font-body);
-      background    : var(--bg);
-      color         : var(--text);
-      min-height    : 100vh;
-      display       : flex;
-      flex-direction: column;
-    }
+        /* ── Navbar ── */
+        .navbar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
 
-    /* ── Navbar ─────────────────────────────────────────── */
-    .navbar {
-      position    : sticky;
-      top         : 0;
-      z-index     : 100;
-      background  : rgba(255,255,255,0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      height      : var(--nav-h);
-      display     : flex;
-      align-items : center;
-      padding     : 0 40px;
-      box-shadow  : 0 2px 12px rgba(0,0,0,0.06);
-    }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    .nav-inner {
-      max-width  : 1200px;
-      width      : 100%;
-      margin     : auto;
-      display    : flex;
-      align-items: center;
-      gap        : 8px;
-    }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .nav-logo {
-      display    : flex;
-      align-items: center;
-      gap        : 10px;
-      text-decoration: none;
-      flex-shrink: 0;
-      margin-right: auto;
-    }
+        .logo i {
+            color: var(--secondary);
+        }
 
-    .nav-logo-icon {
-      width         : 36px;
-      height        : 36px;
-      background    : linear-gradient(135deg, var(--orange), var(--orange-mid));
-      border-radius : 10px;
-      display       : flex;
-      align-items   : center;
-      justify-content: center;
-      font-size     : 18px;
-      box-shadow    : 0 4px 12px rgba(238,77,45,0.3);
-    }
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 1.5rem;
+            transition: color 0.2s;
+        }
 
-    .nav-logo-text {
-      font-family : var(--font-display);
-      font-size   : 20px;
-      font-weight : 800;
-      color       : var(--text);
-    }
-    .nav-logo-text span { color: var(--orange); }
+        .nav-links a:hover {
+            color: var(--primary);
+        }
 
-    .nav-links {
-      display   : flex;
-      gap       : 4px;
-      list-style: none;
-    }
+        /* ── Main Content ── */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            width: 100%;
+        }
 
-    .nav-links a {
-      text-decoration: none;
-      color          : var(--text-muted);
-      font-size      : 14px;
-      font-weight    : 600;
-      padding        : 8px 14px;
-      border-radius  : 8px;
-      transition     : all .2s;
-      white-space    : nowrap;
-    }
+        /* ── Alerts ── */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .alert-error {
+            background-color: #FEF2F2;
+            color: #B91C1C;
+            border: 1px solid #F87171;
+        }
 
-    .nav-links a:hover,
-    .nav-links a.active {
-      background: var(--orange-light);
-      color     : var(--orange);
-    }
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
 
-    .nav-cta {
-      background    : var(--orange) !important;
-      color         : white !important;
-      padding       : 8px 18px !important;
-      border-radius : 8px !important;
-      box-shadow    : 0 4px 12px rgba(238,77,45,0.3);
-    }
-    .nav-cta:hover {
-      background : var(--orange-dark) !important;
-      color      : white !important;
-      transform  : translateY(-1px);
-    }
-
-    /* ── Main ──────────────────────────────────────────── */
-    main { flex: 1; }
-
-    .container {
-      max-width: 1200px;
-      margin   : 0 auto;
-      padding  : 0 24px;
-    }
-
-    /* ── Cards ─────────────────────────────────────────── */
-    .card {
-      background   : var(--white);
-      border-radius: var(--radius);
-      border       : 1px solid var(--border);
-      box-shadow   : var(--shadow-sm);
-      padding      : 28px;
-    }
-
-    /* ── Buttons ──────────────────────────────────────── */
-    .btn {
-      display        : inline-flex;
-      align-items    : center;
-      gap            : 8px;
-      padding        : 12px 28px;
-      border-radius  : 10px;
-      font-family    : var(--font-body);
-      font-size      : 15px;
-      font-weight    : 600;
-      cursor         : pointer;
-      border         : none;
-      text-decoration: none;
-      transition     : all .2s;
-    }
-
-    .btn-primary {
-      background : linear-gradient(135deg, var(--orange), var(--orange-mid));
-      color      : white;
-      box-shadow : 0 4px 16px rgba(238,77,45,0.3);
-    }
-    .btn-primary:hover {
-      transform  : translateY(-2px);
-      box-shadow : 0 8px 24px rgba(238,77,45,0.4);
-    }
-
-    .btn-secondary {
-      background : var(--green);
-      color      : white;
-      box-shadow : 0 4px 16px rgba(38,170,153,0.3);
-    }
-    .btn-secondary:hover {
-      background : #1e8a7c;
-      transform  : translateY(-2px);
-    }
-
-    .btn-outline {
-      background: transparent;
-      border    : 2px solid var(--border);
-      color     : var(--text);
-    }
-    .btn-outline:hover {
-      border-color: var(--orange);
-      color       : var(--orange);
-    }
-
-    /* ── Badges ───────────────────────────────────────── */
-    .badge {
-      display      : inline-block;
-      padding      : 4px 12px;
-      border-radius: 20px;
-      font-size    : 12px;
-      font-weight  : 700;
-      letter-spacing: 0.5px;
-    }
-    .badge-orange { background: var(--orange-light); color: var(--orange); }
-    .badge-green  { background: var(--green-light);  color: var(--green);  }
-    .badge-yellow { background: var(--yellow-light); color: var(--yellow); }
-    .badge-purple { background: var(--purple-light); color: var(--purple); }
-
-    /* ── Form Elements ────────────────────────────────── */
-    .form-group { margin-bottom: 20px; }
-
-    .form-label {
-      display      : block;
-      font-size    : 14px;
-      font-weight  : 700;
-      color        : var(--text);
-      margin-bottom: 8px;
-    }
-
-    .form-input {
-      width        : 100%;
-      padding      : 13px 16px;
-      border       : 2px solid var(--border);
-      border-radius: 10px;
-      font-family  : var(--font-body);
-      font-size    : 14px;
-      color        : var(--text);
-      background   : white;
-      outline      : none;
-      transition   : border-color .2s, box-shadow .2s;
-    }
-    .form-input:focus {
-      border-color: var(--orange);
-      box-shadow  : 0 0 0 4px rgba(238,77,45,0.08);
-    }
-    .form-input::placeholder { color: var(--text-muted); }
-
-    /* ── Alert / Error ────────────────────────────────── */
-    .alert {
-      border-radius: 10px;
-      padding      : 14px 18px;
-      font-size    : 14px;
-      margin-bottom: 20px;
-      display      : flex;
-      gap          : 10px;
-      align-items  : center;
-    }
-    .alert-error {
-      background: var(--orange-light);
-      border    : 1.5px solid var(--orange);
-      color     : var(--orange-dark);
-    }
-
-    /* ── Footer ───────────────────────────────────────── */
-    footer {
-      background : linear-gradient(135deg, #1A1A2E, #2D1810);
-      color      : rgba(255,255,255,0.5);
-      padding    : 32px 40px;
-      text-align : center;
-      font-size  : 13px;
-      margin-top : auto;
-      line-height: 1.8;
-    }
-    footer strong { color: var(--orange); }
-    footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
-    footer a:hover { color: var(--orange); }
-
-    /* ── Stars ────────────────────────────────────────── */
-    .stars { color: #FFA800; letter-spacing: 2px; }
-
-    /* ── Utilities ────────────────────────────────────── */
-    .text-muted   { color: var(--text-muted); }
-    .text-orange  { color: var(--orange); }
-    .text-green   { color: var(--green); }
-    .text-center  { text-align: center; }
-    .fw-bold      { font-weight: 700; }
-    .mt-4         { margin-top: 32px; }
-    .mt-2         { margin-top: 16px; }
-    .mb-2         { margin-bottom: 16px; }
-    .flex         { display: flex; }
-    .flex-wrap    { flex-wrap: wrap; }
-    .items-center { align-items: center; }
-    .gap-2        { gap: 16px; }
-
-    /* ── Loading Overlay ──────────────────────────────── */
-    .loading-overlay {
-      display        : none;
-      position       : fixed;
-      inset          : 0;
-      background     : rgba(26,26,46,0.65);
-      backdrop-filter: blur(4px);
-      z-index        : 200;
-      flex-direction : column;
-      align-items    : center;
-      justify-content: center;
-    }
-    .loading-overlay.show { display: flex; }
-
-    .loading-card {
-      background   : white;
-      border-radius: 20px;
-      padding      : 44px 60px;
-      text-align   : center;
-      box-shadow   : 0 24px 64px rgba(0,0,0,0.2);
-      max-width    : 340px;
-    }
-
-    .spinner {
-      width        : 52px;
-      height       : 52px;
-      border       : 4px solid var(--orange-light);
-      border-top   : 4px solid var(--orange);
-      border-radius: 50%;
-      animation    : spin 0.8s linear infinite;
-      margin       : 0 auto 18px;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loading-title {
-      font-family  : var(--font-display);
-      font-size    : 20px;
-      font-weight  : 800;
-      margin-bottom: 6px;
-      color        : var(--text);
-    }
-
-    .loading-steps {
-      font-size : 13px;
-      color     : var(--text-muted);
-      list-style: none;
-      margin-top: 16px;
-      text-align: left;
-    }
-    .loading-steps li {
-      padding    : 4px 0;
-      display    : flex;
-      gap        : 8px;
-      align-items: center;
-    }
-    .loading-steps li::before {
-      content  : "◦";
-      color    : var(--orange);
-      font-size: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .navbar { padding: 0 16px; }
-      .nav-links li:not(:last-child) { display: none; }
-    }
-  </style>
-  {% block extra_head %}{% endblock %}
+        /* ── Common Utilities ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover {
+            background-color: #F9FAFB;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="nav-inner">
-    <a href="/" class="nav-logo">
-      <div class="nav-logo-icon">🔍</div>
-      <span class="nav-logo-text">Shopee<span>Sentiment</span></span>
-    </a>
-    <ul class="nav-links">
-      <li><a href="/" class="{% if request.endpoint == 'home' %}active{% endif %}">Beranda</a></li>
-      <li><a href="/analisis" class="{% if request.endpoint == 'analisis' %}active{% endif %}">Analisis</a></li>
-      <li><a href="/bandingkan" class="{% if request.endpoint == 'bandingkan' %}active{% endif %}">🆚 Bandingkan</a></li>
-      <li><a href="/tentang" class="{% if request.endpoint == 'tentang' %}active{% endif %}">Tentang</a></li>
-      <li><a href="/analisis" class="nav-cta">Cek Produk →</a></li>
-    </ul>
-  </div>
-</nav>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <i class="fa-solid fa-file-signature"></i> CV-Match AI
+            </a>
+            <div class="nav-links">
+                <a href="/">Beranda</a>
+                <a href="https://github.com" target="_blank"><i class="fa-brands fa-github"></i> Source</a>
+            </div>
+        </div>
+    </nav>
 
-<main>{% block content %}{% endblock %}</main>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-<footer>
-  <p>© 2025 <strong>ShopeeSentiment</strong> — Perancangan Aplikasi Sains Data</p>
-  <p style="margin-top:4px">Program Studi Sains Data · Telkom University &nbsp;|&nbsp; Powered by NLP & Python</p>
-</footer>
+        {% block content %}{% endblock %}
+    </main>
 
+    <footer>
+        &copy; 2026 CV-Match AI | Tugas Besar Perancangan Aplikasi Sains Data | Telkom University
+    </footer>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

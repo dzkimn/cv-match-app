@@ -1,556 +1,397 @@
 {% extends "base.html" %}
-{% block title %}ShopeeSentiment — Analisis Ulasan Produk Shopee{% endblock %}
 
-{% block extra_head %}
+{% block extra_css %}
 <style>
-/* ── Hero ────────────────────────────────────────────── */
-.hero {
-  background: linear-gradient(135deg, #FFF3F0 0%, #FAFAFA 60%, #E8F8F6 100%);
-  padding   : 80px 24px 64px;
-  overflow  : hidden;
-  position  : relative;
-}
+    .hero {
+        text-align: center;
+        padding: 4rem 1rem;
+        background: linear-gradient(135deg, var(--surface) 0%, var(--bg-color) 100%);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 3rem;
+        border: 1px solid var(--border);
+    }
 
-.hero::before {
-  content   : "";
-  position  : absolute;
-  top: -80px; right: -80px;
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(238,77,45,0.08) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
-}
+    .hero h1 {
+        font-size: 2.5rem;
+        color: var(--text-main);
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+    
+    .hero h1 span {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-.hero-inner {
-  max-width : 1200px;
-  margin    : 0 auto;
-  display   : grid;
-  grid-template-columns: 1fr 1fr;
-  gap       : 60px;
-  align-items: center;
-}
+    .hero p {
+        font-size: 1.125rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto 2.5rem;
+    }
 
-.hero-badge {
-  display    : inline-flex;
-  align-items: center;
-  gap        : 8px;
-  background : var(--orange-light);
-  color      : var(--orange);
-  padding    : 6px 16px;
-  border-radius: 20px;
-  font-size  : 13px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
+    .upload-card {
+        background: var(--surface);
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2.5rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+    }
 
-.hero-title {
-  font-family  : var(--font-display);
-  font-size    : clamp(36px, 5vw, 56px);
-  font-weight  : 800;
-  line-height  : 1.1;
-  color        : var(--text);
-  margin-bottom: 20px;
-}
+    .upload-zone {
+        border: 2px dashed #CBD5E1;
+        border-radius: var(--radius-md);
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background-color: #F8FAFC;
+        margin-bottom: 1.5rem;
+    }
 
-.hero-title .accent {
-  color      : var(--orange);
-  position   : relative;
-  display    : inline-block;
-}
+    .upload-zone:hover, .upload-zone.dragover {
+        border-color: var(--primary);
+        background-color: #EEF2FF;
+    }
 
-.hero-desc {
-  font-size    : 17px;
-  color        : var(--text-muted);
-  line-height  : 1.7;
-  margin-bottom: 32px;
-  max-width    : 480px;
-}
+    .upload-icon {
+        font-size: 3rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
 
-.hero-actions {
-  display    : flex;
-  gap        : 12px;
-  flex-wrap  : wrap;
-  align-items: center;
-}
+    .upload-text {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
 
-.hero-stats {
-  display  : flex;
-  gap      : 32px;
-  margin-top: 48px;
-  flex-wrap: wrap;
-}
+    .upload-hint {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
 
-.stat-item { }
-.stat-num {
-  font-family : var(--font-display);
-  font-size   : 28px;
-  font-weight : 800;
-  color       : var(--orange);
-  display     : block;
-}
-.stat-label {
-  font-size : 13px;
-  color     : var(--text-muted);
-  font-weight: 600;
-}
+    #file-input {
+        display: none;
+    }
 
-/* ── Mock Browser ────────────────────────────────────── */
-.hero-visual {
-  position: relative;
-}
+    .file-name-display {
+        display: none;
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #F3F4F6;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        color: var(--primary);
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
 
-.browser-frame {
-  background   : white;
-  border-radius: 16px;
-  box-shadow   : 0 24px 64px rgba(0,0,0,0.12);
-  overflow     : hidden;
-  border       : 1px solid var(--border);
-}
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.125rem;
+    }
+    
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(4px);
+        z-index: 100;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+    
+    @keyframes spin { 100% { transform: rotate(360deg); } }
 
-.browser-bar {
-  background  : #F3F4F6;
-  padding     : 12px 16px;
-  display     : flex;
-  align-items : center;
-  gap         : 8px;
-  border-bottom: 1px solid var(--border);
-}
+    /* ── Pipeline Section Styling ── */
+    .pipeline-section {
+        margin-top: 4rem;
+        padding-top: 3rem;
+        border-top: 1px solid var(--border);
+    }
+    .pipeline-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .pipeline-header h2 {
+        font-size: 2rem;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+    }
+    .pipeline-header p {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+    .pipeline-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .pipeline-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1.75rem 1.25rem;
+        position: relative;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+    }
+    .pipeline-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary);
+    }
+    .pipeline-badge {
+        position: absolute;
+        top: -12px;
+        left: 20px;
+        background: linear-gradient(135deg, var(--primary), #6366f1);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    }
+    .pipeline-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: #EEF2FF;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
+        margin-top: 0.5rem;
+    }
+    .pipeline-card:nth-child(2) .pipeline-icon-wrapper { background: #ECFDF5; color: #10B981; }
+    .pipeline-card:nth-child(3) .pipeline-icon-wrapper { background: #FEF3C7; color: #D97706; }
+    .pipeline-card:nth-child(4) .pipeline-icon-wrapper { background: #F5F3FF; color: #8B5CF6; }
+    .pipeline-card:nth-child(5) .pipeline-icon-wrapper { background: #FDF2F8; color: #EC4899; }
 
-.browser-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-}
+    .pipeline-card:nth-child(2) .pipeline-badge { background: linear-gradient(135deg, #10B981, #059669); }
+    .pipeline-card:nth-child(3) .pipeline-badge { background: linear-gradient(135deg, #F59E0B, #D97706); }
+    .pipeline-card:nth-child(4) .pipeline-badge { background: linear-gradient(135deg, #8B5CF6, #7C3AED); }
+    .pipeline-card:nth-child(5) .pipeline-badge { background: linear-gradient(135deg, #EC4899, #DB2777); }
 
-.browser-url {
-  flex        : 1;
-  background  : white;
-  border-radius: 6px;
-  padding     : 5px 12px;
-  font-size   : 12px;
-  color       : var(--text-muted);
-  margin      : 0 8px;
-}
-
-.browser-body { padding: 20px; }
-
-.result-card-mock {
-  background   : #FFF3F0;
-  border-radius: 12px;
-  padding      : 16px;
-  margin-bottom: 12px;
-  display      : flex;
-  align-items  : center;
-  gap          : 14px;
-}
-
-.result-icon {
-  width          : 44px;
-  height         : 44px;
-  border-radius  : 10px;
-  background     : var(--orange);
-  display        : flex;
-  align-items    : center;
-  justify-content: center;
-  font-size      : 22px;
-  flex-shrink    : 0;
-}
-
-.mock-bar {
-  height       : 8px;
-  border-radius: 4px;
-  background   : var(--border);
-  margin-bottom: 6px;
-  overflow     : hidden;
-}
-
-.mock-bar-fill {
-  height    : 100%;
-  border-radius: 4px;
-  background: var(--orange);
-  animation : fillBar 2s ease-in-out infinite alternate;
-}
-
-@keyframes fillBar {
-  from { width: 30%; }
-  to   { width: 85%; }
-}
-
-.recommendation-mock {
-  background   : #E8F8F6;
-  border-radius: 12px;
-  padding      : 14px 16px;
-  display      : flex;
-  align-items  : center;
-  gap          : 10px;
-  border-left  : 4px solid var(--green);
-}
-
-/* ── Features ────────────────────────────────────────── */
-.features {
-  padding  : 72px 24px;
-  max-width: 1200px;
-  margin   : 0 auto;
-}
-
-.section-header { margin-bottom: 48px; }
-.section-tag {
-  display    : inline-block;
-  background : var(--orange-light);
-  color      : var(--orange);
-  padding    : 4px 14px;
-  border-radius: 20px;
-  font-size  : 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.section-title {
-  font-family : var(--font-display);
-  font-size   : clamp(28px, 4vw, 40px);
-  font-weight : 800;
-  margin-bottom: 12px;
-}
-
-.section-desc {
-  color    : var(--text-muted);
-  font-size: 16px;
-  max-width: 520px;
-}
-
-.features-grid {
-  display              : grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap                  : 20px;
-}
-
-.feature-card {
-  background   : white;
-  border-radius: var(--radius);
-  padding      : 28px;
-  border       : 1px solid var(--border);
-  transition   : all .25s;
-}
-
-.feature-card:hover {
-  border-color : var(--orange);
-  box-shadow   : var(--shadow);
-  transform    : translateY(-2px);
-}
-
-.feature-icon {
-  width        : 48px;
-  height       : 48px;
-  border-radius: 12px;
-  background   : var(--orange-light);
-  display      : flex;
-  align-items  : center;
-  justify-content: center;
-  font-size    : 24px;
-  margin-bottom: 16px;
-}
-
-.feature-title {
-  font-size    : 16px;
-  font-weight  : 700;
-  margin-bottom: 8px;
-}
-
-.feature-desc {
-  font-size  : 14px;
-  color      : var(--text-muted);
-  line-height: 1.6;
-}
-
-/* ── Steps ───────────────────────────────────────────── */
-.steps-section {
-  background: linear-gradient(135deg, var(--orange) 0%, #C73B1E 100%);
-  padding   : 72px 24px;
-  color     : white;
-}
-
-.steps-inner {
-  max-width: 1200px;
-  margin   : 0 auto;
-}
-
-.steps-section .section-title { color: white; }
-.steps-section .section-desc  { color: rgba(255,255,255,0.7); }
-.steps-section .section-tag   {
-  background: rgba(255,255,255,0.2);
-  color     : white;
-}
-
-.steps-grid {
-  display              : grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap                  : 24px;
-  margin-top           : 40px;
-}
-
-.step-card {
-  background   : rgba(255,255,255,0.12);
-  border-radius: var(--radius);
-  padding      : 28px 24px;
-  border       : 1px solid rgba(255,255,255,0.2);
-  text-align   : center;
-  transition   : background .2s;
-}
-.step-card:hover { background: rgba(255,255,255,0.2); }
-
-.step-num {
-  font-family  : var(--font-display);
-  font-size    : 40px;
-  font-weight  : 800;
-  color        : rgba(255,255,255,0.3);
-  display      : block;
-  margin-bottom: 8px;
-}
-
-.step-icon  { font-size: 32px; margin-bottom: 14px; }
-.step-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-.step-desc  { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; }
-
-/* ── CTA ─────────────────────────────────────────────── */
-.cta-section {
-  padding   : 72px 24px;
-  text-align: center;
-  background: var(--bg);
-}
-
-.cta-card {
-  max-width    : 640px;
-  margin       : 0 auto;
-  background   : white;
-  border-radius: 24px;
-  padding      : 56px 48px;
-  border       : 1px solid var(--border);
-  box-shadow   : 0 8px 40px rgba(238,77,45,0.08);
-}
-
-.cta-title {
-  font-family  : var(--font-display);
-  font-size    : 34px;
-  font-weight  : 800;
-  margin-bottom: 14px;
-}
-
-.cta-desc {
-  color        : var(--text-muted);
-  font-size    : 16px;
-  margin-bottom: 32px;
-  line-height  : 1.6;
-}
-
-.cta-input-group {
-  display      : flex;
-  gap          : 10px;
-  background   : var(--bg);
-  border       : 2px solid var(--border);
-  border-radius: 12px;
-  padding      : 6px 6px 6px 16px;
-  align-items  : center;
-  transition   : border-color .2s;
-}
-.cta-input-group:focus-within { border-color: var(--orange); }
-
-.cta-input {
-  flex       : 1;
-  border     : none;
-  background : transparent;
-  font-family: var(--font-body);
-  font-size  : 15px;
-  outline    : none;
-  color      : var(--text);
-}
-
-@media (max-width: 768px) {
-  .hero-inner { grid-template-columns: 1fr; }
-  .hero-visual { display: none; }
-  .cta-card { padding: 32px 20px; }
-}
+    .pipeline-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-main);
+    }
+    .pipeline-desc {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        flex-grow: 1;
+    }
+    .pipeline-instruction {
+        font-size: 0.775rem;
+        background: #F8FAFC;
+        border-left: 3px solid var(--primary);
+        padding: 0.5rem;
+        border-radius: 0 4px 4px 0;
+        color: #475569;
+    }
+    .pipeline-card:nth-child(2) .pipeline-instruction { border-left-color: #10B981; }
+    .pipeline-card:nth-child(3) .pipeline-instruction { border-left-color: #F59E0B; }
+    .pipeline-card:nth-child(4) .pipeline-instruction { border-left-color: #8B5CF6; }
+    .pipeline-card:nth-child(5) .pipeline-instruction { border-left-color: #EC4899; }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="hero">
+    <h1>Tingkatkan Karirmu dengan <span>CV-Match AI</span></h1>
+    <p>Unggah CV-mu dan biarkan teknologi Natural Language Processing (NLP) kami mencarikan pekerjaan yang paling sesuai dengan keahlianmu secara semantik.</p>
+</div>
 
-<!-- ── Hero ─────────────────────────────────────────────────── -->
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-content">
-      <div class="hero-badge">🔬 Berbasis NLP &amp; Machine Learning</div>
-      <h1 class="hero-title">
-        Analisis <span class="accent">Sentimen</span><br>
-        Ulasan Shopee<br>
-        dalam Detik
-      </h1>
-      <p class="hero-desc">
-        Masukkan link produk Shopee, dan biarkan AI kami menganalisis
-        ratusan ulasan pembeli untuk memberi tahu apakah produk tersebut
-        <strong>layak dibeli</strong> atau tidak.
-      </p>
-      <div class="hero-actions">
-        <a href="/analisis" class="btn btn-primary">🚀 Mulai Analisis</a>
-        <a href="/tentang" class="btn btn-outline">Pelajari Lebih →</a>
-      </div>
-      <div class="hero-stats">
-        <div class="stat-item">
-          <span class="stat-num">2.500+</span>
-          <span class="stat-label">Ulasan Dilatih</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num">3</span>
-          <span class="stat-label">Model Analisis</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num">~3s</span>
-          <span class="stat-label">Waktu Analisis</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="hero-visual">
-      <div class="browser-frame">
-        <div class="browser-bar">
-          <div class="browser-dot" style="background:#FF5F57"></div>
-          <div class="browser-dot" style="background:#FFC027"></div>
-          <div class="browser-dot" style="background:#29C940"></div>
-          <div class="browser-url">shopee.co.id/produk/...</div>
-        </div>
-        <div class="browser-body">
-          <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;font-weight:600;">HASIL ANALISIS PRODUK</div>
-
-          <div class="result-card-mock">
-            <div class="result-icon">📦</div>
-            <div style="flex:1">
-              <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Smartwatch X-Series</div>
-              <div style="color:var(--text-muted);font-size:12px;">234 ulasan dianalisis</div>
-              <div class="mock-bar mt-2" style="width:80%;margin-top:8px">
-                <div class="mock-bar-fill"></div>
-              </div>
+<div class="upload-card">
+    <form action="/" method="POST" enctype="multipart/form-data" id="upload-form">
+        <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+            <div class="upload-text">Pilih atau Tarik File CV ke Sini</div>
+            <div class="upload-hint">Format yang didukung: .PDF (Maks 5MB)</div>
+            <input type="file" name="cv_file" id="file-input" accept=".pdf">
+            <div class="file-name-display" id="file-name">
+                <i class="fa-solid fa-file-pdf"></i> <span id="name-text"></span>
             </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
-            <div style="background:#E8F8F6;border-radius:10px;padding:10px;text-align:center">
-              <div style="font-size:18px;font-weight:800;color:var(--green)">72%</div>
-              <div style="font-size:11px;color:var(--text-muted)">Positif</div>
-            </div>
-            <div style="background:#FFF8E7;border-radius:10px;padding:10px;text-align:center">
-              <div style="font-size:18px;font-weight:800;color:var(--yellow)">14%</div>
-              <div style="font-size:11px;color:var(--text-muted)">Netral</div>
-            </div>
-            <div style="background:#FFF3F0;border-radius:10px;padding:10px;text-align:center">
-              <div style="font-size:18px;font-weight:800;color:var(--orange)">14%</div>
-              <div style="font-size:11px;color:var(--text-muted)">Negatif</div>
-            </div>
-          </div>
-
-          <div class="recommendation-mock">
-            <span style="font-size:20px">✅</span>
-            <div>
-              <div style="font-weight:700;font-size:13px;color:var(--green)">LAYAK DIBELI</div>
-              <div style="font-size:11px;color:var(--text-muted)">Confidence Score: 87.4%</div>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Features ──────────────────────────────────────────────── -->
-<section class="features">
-  <div class="section-header">
-    <div class="section-tag">✨ Fitur Utama</div>
-    <h2 class="section-title">Semua yang Anda butuhkan<br>dalam satu analisis</h2>
-    <p class="section-desc">Dari rating rata-rata hingga kata kunci keluhan, semuanya tersedia dalam laporan yang mudah dipahami.</p>
-  </div>
-
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">⭐</div>
-      <div class="feature-title">Statistik Rating</div>
-      <p class="feature-desc">Rata-rata, distribusi bintang, dan tren rating dari waktu ke waktu dalam visualisasi yang jelas.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">💬</div>
-      <div class="feature-title">Analisis Sentimen</div>
-      <p class="feature-desc">Klasifikasi ulasan menjadi positif, netral, dan negatif menggunakan model NLP berbasis leksikon Bahasa Indonesia.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔑</div>
-      <div class="feature-title">Kata Kunci Dominan</div>
-      <p class="feature-desc">Ekstraksi otomatis kata yang paling sering disebut pembeli — baik pujian maupun keluhan.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🎯</div>
-      <div class="feature-title">Rekomendasi AI</div>
-      <p class="feature-desc">Kesimpulan otomatis: Layak Dibeli, Pertimbangkan, atau Hati-Hati — lengkap dengan confidence score.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📊</div>
-      <div class="feature-title">Grafik Interaktif</div>
-      <p class="feature-desc">Visualisasi donut chart sentimen, bar chart rating, dan tren rating secara otomatis.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📝</div>
-      <div class="feature-title">Sampel Ulasan</div>
-      <p class="feature-desc">Cuplikan ulasan positif dan negatif terpilih agar Anda bisa memahami konteks secara langsung.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ── Steps ──────────────────────────────────────────────────── -->
-<section class="steps-section">
-  <div class="steps-inner">
-    <div class="section-header">
-      <div class="section-tag">🚀 Cara Kerja</div>
-      <h2 class="section-title">3 langkah mudah</h2>
-      <p class="section-desc">Dari URL ke laporan analisis hanya butuh beberapa detik.</p>
-    </div>
-    <div class="steps-grid">
-      <div class="step-card">
-        <span class="step-num">01</span>
-        <div class="step-icon">🔗</div>
-        <div class="step-title">Tempel URL Produk</div>
-        <p class="step-desc">Salin URL produk Shopee dari browser dan tempelkan ke kolom analisis kami.</p>
-      </div>
-      <div class="step-card">
-        <span class="step-num">02</span>
-        <div class="step-icon">⚙️</div>
-        <div class="step-title">AI Menganalisis</div>
-        <p class="step-desc">Sistem mengambil ulasan dan menjalankan pipeline NLP untuk mengklasifikasikan sentimen.</p>
-      </div>
-      <div class="step-card">
-        <span class="step-num">03</span>
-        <div class="step-icon">📋</div>
-        <div class="step-title">Baca Laporan</div>
-        <p class="step-desc">Dapatkan laporan lengkap: grafik, kata kunci, dan rekomendasi beli atau tidak.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── CTA ────────────────────────────────────────────────────── -->
-<section class="cta-section">
-  <div class="cta-card">
-    <div style="font-size:40px;margin-bottom:16px">🛍️</div>
-    <h2 class="cta-title">Coba Sekarang,<br>Gratis!</h2>
-    <p class="cta-desc">Tempelkan link produk Shopee di bawah dan lihat hasil analisis dalam hitungan detik.</p>
-    <form action="/analisis" method="POST">
-      <div class="cta-input-group">
-        <input
-          class="cta-input"
-          type="text"
-          name="product_url"
-          placeholder="https://shopee.co.id/produk-anda-i.12345678.9876543"
-        />
-        <button type="submit" class="btn btn-primary">Analisis →</button>
-      </div>
+        <button type="submit" class="btn btn-primary submit-btn" id="submit-btn" disabled>
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Analisis Kecocokan CV
+        </button>
     </form>
-  </div>
-</section>
+</div>
 
+<!-- ⚙️ Pipeline Sains Data & Cara Kerja AI -->
+<div class="pipeline-section">
+    <div class="pipeline-header">
+        <h2>⚙️ Alur Proses AI & Pipeline Sains Data</h2>
+        <p>Penjelasan teknis dan panduan optimalisasi CV Anda untuk melewati setiap tahapan evaluasi algoritma NLP kami</p>
+    </div>
+    <div class="pipeline-grid">
+        <!-- Tahap 1 -->
+        <div class="pipeline-card">
+            <span class="pipeline-badge">Tahap 1</span>
+            <div class="pipeline-icon-wrapper">
+                <i class="fa-solid fa-file-import"></i>
+            </div>
+            <div class="pipeline-title">Data Gathering</div>
+            <p class="pipeline-desc">AI membaca file CV PDF secara dinamis dan memuat kamus dataset karir industri (73 peran pekerjaan aktif).</p>
+            <div class="pipeline-instruction">
+                <strong>Instruksi CV:</strong> Unggah file PDF asli (berbasis teks). Hindari hasil scan foto agar teks terbaca sempurna oleh library PyPDF2.
+            </div>
+        </div>
+
+        <!-- Tahap 2 -->
+        <div class="pipeline-card">
+            <span class="pipeline-badge">Tahap 2</span>
+            <div class="pipeline-icon-wrapper">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div class="pipeline-title">Text Preprocessing</div>
+            <p class="pipeline-desc">Teks dibersihkan dari simbol asing, angka, spasi berlebih, dan diseragamkan ke huruf kecil (Case Folding).</p>
+            <div class="pipeline-instruction">
+                <strong>Instruksi CV:</strong> Gunakan tata letak sederhana (1 kolom). Jangan taruh teks penting di dalam kotak grafis agar tidak pecah saat diekstrak.
+            </div>
+        </div>
+
+        <!-- Tahap 3 -->
+        <div class="pipeline-card">
+            <span class="pipeline-badge">Tahap 3</span>
+            <div class="pipeline-icon-wrapper">
+                <i class="fa-solid fa-key"></i>
+            </div>
+            <div class="pipeline-title">Feature Extraction</div>
+            <p class="pipeline-desc">Mengekstrak dan menghitung bobot kata kunci terpenting di CV Anda menggunakan pembobotan statistik TF-IDF n-gram.</p>
+            <div class="pipeline-instruction">
+                <strong>Instruksi CV:</strong> Tulis keahlian teknis secara eksplisit (seperti 'Python', 'SQL', 'Figma') daripada sekadar grafik persentase abstrak.
+            </div>
+        </div>
+
+        <!-- Tahap 4 -->
+        <div class="pipeline-card">
+            <span class="pipeline-badge">Tahap 4</span>
+            <div class="pipeline-icon-wrapper">
+                <i class="fa-solid fa-diagram-project"></i>
+            </div>
+            <div class="pipeline-title">Semantic LSA</div>
+            <p class="pipeline-desc">Menghitung kesamaan makna kata (sinonim) lewat model LSA (SVD) untuk menangkap konteks keahlian secara matematis.</p>
+            <div class="pipeline-instruction">
+                <strong>Instruksi CV:</strong> Jabarkan pencapaian proyek Anda dengan deskripsi mendalam agar model LSA dapat menangkap konteks kalimat Anda secara logis.
+            </div>
+        </div>
+
+        <!-- Tahap 5 -->
+        <div class="pipeline-card">
+            <span class="pipeline-badge">Tahap 5</span>
+            <div class="pipeline-icon-wrapper">
+                <i class="fa-solid fa-ranking-star"></i>
+            </div>
+            <div class="pipeline-title">Expert System Scorer</div>
+            <p class="pipeline-desc">Sistem Pakar menguji kehadiran Action Verbs, metrik pencapaian (angka/%), serta profiling Soft Skills berbasis kamus kepribadian.</p>
+            <div class="pipeline-instruction">
+                <strong>Instruksi CV:</strong> Cantumkan angka/data kuantitatif konkret (misal: 'menaikkan penjualan 25%') dan pakai kata kerja aktif kuat.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <h3 style="color: var(--text-main); font-weight: 700;">AI sedang membaca dan menganalisis CV-mu...</h3>
+    <p style="color: var(--text-muted); margin-top: 0.5rem;">Memproses: Preprocessing &rarr; TF-IDF Fitur &rarr; Pemodelan Semantik LSA &rarr; Expert Scoring</p>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const fileNameDisplay = document.getElementById('file-name');
+    const nameText = document.getElementById('name-text');
+    const submitBtn = document.getElementById('submit-btn');
+    const form = document.getElementById('upload-form');
+    const loading = document.getElementById('loading');
+
+    // Drag and drop handlers
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if(files.length > 0) {
+            fileInput.files = files;
+            updateFileInfo();
+        }
+    });
+
+    fileInput.addEventListener('change', updateFileInfo);
+
+    function updateFileInfo() {
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            if (file.type === "application/pdf") {
+                nameText.textContent = file.name;
+                fileNameDisplay.style.display = 'flex';
+                submitBtn.disabled = false;
+            } else {
+                alert("Harap unggah file dengan format PDF.");
+                fileInput.value = "";
+                fileNameDisplay.style.display = 'none';
+                submitBtn.disabled = true;
+            }
+        }
+    }
+
+    form.addEventListener('submit', () => {
+        if(!submitBtn.disabled) {
+            loading.style.display = 'flex';
+        }
+    });
+</script>
 {% endblock %}

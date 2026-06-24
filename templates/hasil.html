@@ -1,573 +1,569 @@
 {% extends "base.html" %}
-{% block title %}Hasil Analisis: {{ r.product_name }} — ShopeeSentiment{% endblock %}
 
-{% block extra_head %}
+{% block extra_css %}
+<!-- Menggunakan CDN Chart.js untuk Radar Chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-/* ── Page Header ─────────────────────────────────────── */
-.result-header {
-  background: linear-gradient(135deg, #1A1A2E 0%, #2D1810 100%);
-  padding   : 48px 24px;
-  color     : white;
-}
+    /* ... (CSS yang sudah ada) ... */
+    .header-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    
+    .header-info h1 {
+        font-size: 1.875rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .tag {
+        background: #E0E7FF;
+        color: var(--primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    /* IDE A: Quality Scorer CSS */
+    .quality-card {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        color: white;
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+    
+    .score-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: conic-gradient(var(--secondary) {{ quality.score }}%, #334155 0);
+        position: relative;
+        flex-shrink: 0;
+    }
+    .score-circle::before {
+        content: "";
+        position: absolute;
+        inset: 8px;
+        background: #0f172a;
+        border-radius: 50%;
+    }
+    .score-number {
+        position: relative;
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .score-label {
+        position: relative;
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 4px;
+    }
 
-.result-header-inner {
-  max-width : 1100px;
-  margin    : 0 auto;
-}
+    .quality-details h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: #f8fafc;
+    }
+    .quality-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .q-stat {
+        background: rgba(255,255,255,0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+    .q-stat span {
+        font-weight: 700;
+        color: #38bdf8;
+    }
+    .advice-list {
+        list-style-type: none;
+        font-size: 0.9rem;
+        color: #cbd5e1;
+    }
+    .advice-list li {
+        margin-bottom: 0.5rem;
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    .advice-list li::before {
+        content: "💡";
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
 
-.result-breadcrumb {
-  font-size    : 13px;
-  color        : rgba(255,255,255,0.5);
-  margin-bottom: 20px;
-}
+    /* Layout untuk Match Card */
+    .job-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .job-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .job-card { grid-template-columns: 1fr; }
+        .quality-card { flex-direction: column; text-align: center; align-items: center !important; }
+        div[style*="grid-template-columns: 1fr 1fr;"] { grid-template-columns: 1fr !important; }
+    }
+    
+    .job-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .job-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    
+    .job-company {
+        color: var(--text-muted);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+    }
+    
+    .match-badge {
+        background: linear-gradient(135deg, var(--secondary), #059669);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        font-weight: 700;
+        font-size: 1.125rem;
+    }
+    
+    .job-desc {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .skills-section {
+        background: #F9FAFB;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+    }
+    
+    .skill-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .skill-badge {
+        display: inline-block;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .skill-matched { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+    .skill-missing { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    
+    /* Radar Chart Container */
+    .radar-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: #F8FAFC;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+    }
+    canvas {
+        max-width: 100%;
+        max-height: 250px;
+    }
 
-.result-breadcrumb a { color: rgba(255,255,255,0.5); text-decoration: none; }
-.result-breadcrumb a:hover { color: white; }
-
-.result-title {
-  font-family  : var(--font-display);
-  font-size    : clamp(22px, 3vw, 34px);
-  font-weight  : 800;
-  margin-bottom: 8px;
-}
-
-.result-meta {
-  font-size : 14px;
-  color     : rgba(255,255,255,0.5);
-  display   : flex;
-  gap       : 20px;
-  flex-wrap : wrap;
-  margin-top: 8px;
-}
-
-/* ── Recommendation Banner ───────────────────────────── */
-.rec-banner {
-  margin      : -20px 0 0;
-  position    : relative;
-  z-index     : 2;
-}
-
-.rec-banner-inner {
-  max-width    : 1100px;
-  margin       : 0 auto;
-  padding      : 0 24px;
-}
-
-.rec-card {
-  border-radius: 20px;
-  padding      : 28px 32px;
-  display      : grid;
-  grid-template-columns: auto 1fr auto;
-  gap          : 24px;
-  align-items  : center;
-  box-shadow   : 0 8px 32px rgba(0,0,0,0.12);
-  color        : white;
-}
-
-.rec-icon { font-size: 52px; }
-
-.rec-label {
-  font-family  : var(--font-display);
-  font-size    : 26px;
-  font-weight  : 800;
-  margin-bottom: 4px;
-}
-
-.rec-msg {
-  font-size  : 14px;
-  opacity    : 0.85;
-  line-height: 1.5;
-  max-width  : 560px;
-}
-
-.rec-conf {
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.conf-circle {
-  width          : 80px;
-  height         : 80px;
-  border-radius  : 50%;
-  background     : rgba(255,255,255,0.2);
-  border         : 3px solid rgba(255,255,255,0.4);
-  display        : flex;
-  flex-direction : column;
-  align-items    : center;
-  justify-content: center;
-}
-
-.conf-num  { font-family: var(--font-display); font-size: 22px; font-weight: 800; }
-.conf-label{ font-size: 10px; opacity: .7; }
-
-/* ── Content Layout ──────────────────────────────────── */
-.result-body {
-  max-width: 1100px;
-  margin   : 32px auto 60px;
-  padding  : 0 24px;
-  display  : grid;
-  grid-template-columns: 1fr 340px;
-  gap      : 24px;
-}
-
-.result-main { display: flex; flex-direction: column; gap: 24px; }
-.result-side { display: flex; flex-direction: column; gap: 24px; }
-
-/* ── Stat Cards ──────────────────────────────────────── */
-.stats-row {
-  display              : grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap                  : 16px;
-}
-
-.stat-card {
-  background   : white;
-  border       : 1px solid var(--border);
-  border-radius: 14px;
-  padding      : 20px;
-  text-align   : center;
-}
-
-.stat-card-num {
-  font-family: var(--font-display);
-  font-size  : 32px;
-  font-weight: 800;
-  display    : block;
-}
-
-.stat-card-label {
-  font-size : 12px;
-  color     : var(--text-muted);
-  font-weight: 600;
-  margin-top: 2px;
-}
-
-/* ── Chart Cards ─────────────────────────────────────── */
-.chart-grid {
-  display              : grid;
-  grid-template-columns: 1fr 1fr;
-  gap                  : 16px;
-}
-
-.chart-card {
-  background   : white;
-  border       : 1px solid var(--border);
-  border-radius: 14px;
-  padding      : 20px;
-}
-
-.chart-card img { width: 100%; height: auto; display: block; }
-.chart-title    { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
-
-.chart-card-full {
-  background   : white;
-  border       : 1px solid var(--border);
-  border-radius: 14px;
-  padding      : 20px;
-}
-
-/* ── Keywords ────────────────────────────────────────── */
-.keywords-section {
-  background   : white;
-  border       : 1px solid var(--border);
-  border-radius: 14px;
-  padding      : 20px;
-}
-
-.keywords-grid {
-  display              : grid;
-  grid-template-columns: 1fr 1fr;
-  gap                  : 16px;
-  margin-top           : 16px;
-}
-
-.keyword-col-title {
-  font-size    : 12px;
-  font-weight  : 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-}
-
-.keyword-tags {
-  display  : flex;
-  flex-wrap: wrap;
-  gap      : 6px;
-}
-
-.kw-tag {
-  padding      : 5px 12px;
-  border-radius: 20px;
-  font-size    : 13px;
-  font-weight  : 600;
-}
-
-/* ── Review Samples ──────────────────────────────────── */
-.reviews-section {
-  background   : white;
-  border       : 1px solid var(--border);
-  border-radius: 14px;
-  padding      : 20px;
-}
-
-.review-tabs {
-  display      : flex;
-  gap          : 4px;
-  margin-bottom: 16px;
-  border-bottom: 2px solid var(--border);
-  padding-bottom: -2px;
-}
-
-.rtab {
-  padding     : 8px 16px;
-  font-size   : 13px;
-  font-weight : 700;
-  cursor      : pointer;
-  border-radius: 8px 8px 0 0;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  color       : var(--text-muted);
-  transition  : all .15s;
-}
-
-.rtab.active { color: var(--orange); border-bottom-color: var(--orange); }
-
-.review-list { display: none; flex-direction: column; gap: 10px; }
-.review-list.show { display: flex; }
-
-.review-item {
-  background   : var(--bg);
-  border-radius: 10px;
-  padding      : 12px 16px;
-  font-size    : 14px;
-  line-height  : 1.6;
-  color        : var(--text);
-  border-left  : 3px solid var(--border);
-}
-
-.review-item.pos { border-left-color: var(--green); }
-.review-item.neg { border-left-color: var(--orange); }
-
-/* ── Sidebar ─────────────────────────────────────────── */
-.sidebar-card {
-  background   : white;
-  border       : 1px solid var(--border);
-  border-radius: 14px;
-  padding      : 20px;
-}
-
-.sidebar-title {
-  font-size    : 14px;
-  font-weight  : 700;
-  margin-bottom: 14px;
-  display      : flex;
-  gap          : 6px;
-  align-items  : center;
-}
-
-.sentiment-bar-row {
-  display      : flex;
-  align-items  : center;
-  gap          : 8px;
-  margin-bottom: 10px;
-}
-
-.sentiment-bar-label { font-size: 13px; font-weight: 600; min-width: 68px; }
-.sentiment-bar-track {
-  flex         : 1;
-  height       : 10px;
-  background   : var(--border);
-  border-radius: 5px;
-  overflow     : hidden;
-}
-
-.sentiment-bar-fill {
-  height       : 100%;
-  border-radius: 5px;
-  transition   : width .5s ease;
-}
-
-.sentiment-bar-pct { font-size: 12px; color: var(--text-muted); min-width: 40px; text-align: right; }
-
-.rating-row {
-  display      : flex;
-  align-items  : center;
-  gap          : 8px;
-  margin-bottom: 8px;
-  font-size    : 13px;
-}
-
-.rating-row-star { min-width: 28px; color: var(--text-muted); }
-.rating-bar-wrap {
-  flex    : 1;
-  height  : 8px;
-  background: var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.rating-bar-inner {
-  height    : 100%;
-  border-radius: 4px;
-  background: var(--orange);
-}
-
-.rating-row-count { min-width: 50px; text-align: right; color: var(--text-muted); }
-
-.url-display {
-  font-size    : 11px;
-  color        : var(--text-muted);
-  word-break   : break-all;
-  background   : var(--bg);
-  border-radius: 8px;
-  padding      : 8px 10px;
-  margin-top   : 8px;
-  border       : 1px solid var(--border);
-}
-
-@media (max-width: 900px) {
-  .result-body { grid-template-columns: 1fr; }
-  .rec-card    { grid-template-columns: auto 1fr; }
-  .rec-conf    { display: none; }
-  .stats-row   { grid-template-columns: 1fr 1fr; }
-  .chart-grid  { grid-template-columns: 1fr; }
-  .keywords-grid { grid-template-columns: 1fr; }
-}
+    /* ── Pipeline Report Card Styling ── */
+    .pipeline-report-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .pipeline-report-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+    }
+    .pipeline-report-header h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+    .pipeline-report-body {
+        margin-top: 1.25rem;
+        animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .stepper-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        position: relative;
+    }
+    .stepper-vertical::before {
+        content: "";
+        position: absolute;
+        left: 20px;
+        top: 10px;
+        bottom: 10px;
+        width: 2px;
+        background: #E5E7EB;
+        z-index: 1;
+    }
+    .step-item {
+        display: flex;
+        gap: 1.25rem;
+        position: relative;
+        z-index: 2;
+    }
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    .step-success {
+        background: #D1FAE5;
+        color: #059669;
+        border: 2px solid #34D399;
+    }
+    .step-content {
+        padding-top: 0.25rem;
+    }
+    .step-content h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0 0 0.25rem 0;
+    }
+    .step-content p {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin: 0;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-
-<!-- ── Page Header ───────────────────────────────────────────── -->
-<div class="result-header">
-  <div class="result-header-inner">
-    <div class="result-breadcrumb">
-      <a href="/">Beranda</a> &rsaquo; <a href="/analisis">Analisis</a> &rsaquo; Hasil
+<div class="header-section">
+    <div class="header-info">
+        <h1>Hasil Analisis AI</h1>
+        <p>File: <strong>{{ filename }}</strong></p>
+        
+        <div style="margin-top: 1rem;">
+            <span style="font-size: 0.875rem; color: var(--text-muted);">Top Kata Kunci di CV Anda (Berdasarkan TF-IDF):</span>
+            <div class="tag-container">
+                {% for kw in keywords %}
+                    <span class="tag">{{ kw }}</span>
+                {% endfor %}
+            </div>
+        </div>
     </div>
-    <h1 class="result-title">{{ r.product_name }}</h1>
-    <div class="result-meta">
-      <span>📅 {{ r.generated_at }}</span>
-      <span>📊 {{ r.total_reviews }} ulasan dianalisis</span>
-      <span>⭐ Rata-rata {{ r.average_rating }}/5.0</span>
-    </div>
-  </div>
+    <a href="/" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Analisis CV Lain</a>
 </div>
 
-<!-- ── Recommendation Banner ─────────────────────────────────── -->
-<div class="rec-banner">
-  <div class="rec-banner-inner">
-    <div class="rec-card" style="background: {{ r.recommendation_color }}">
-      <div class="rec-icon">
-        {% if r.recommendation == "LAYAK DIBELI" %}✅
-        {% elif r.recommendation == "PERTIMBANGKAN" %}⚠️
-        {% else %}🚫{% endif %}
-      </div>
-      <div>
-        <div class="rec-label">{{ r.recommendation }}</div>
-        <div class="rec-msg">{{ r.recommendation_msg }}</div>
-      </div>
-      <div class="rec-conf">
-        <div class="conf-circle">
-          <span class="conf-num">{{ r.confidence_score }}%</span>
-          <span class="conf-label">Confidence</span>
-        </div>
-      </div>
+<!-- 🔬 Laporan Pipeline Pemrosesan Data (Data Science Steps) -->
+<div class="pipeline-report-card">
+    <div class="pipeline-report-header" onclick="togglePipelineReport()">
+        <h3><i class="fa-solid fa-microscope" style="color: var(--primary);"></i> Laporan Teknis: Pipeline Sains Data (5 Langkah Analisis)</h3>
+        <span id="pipeline-toggle-icon" style="color: var(--text-muted); font-size: 0.875rem;"><i class="fa-solid fa-chevron-down"></i> Tampilkan Detail</span>
     </div>
-  </div>
+    <div class="pipeline-report-body" id="pipelineReportBody" style="display: none;">
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.75rem;">
+            Berikut adalah rincian 5 tahapan pemrosesan NLP (Natural Language Processing) dan sains data yang baru saja dijalankan pada CV Anda:
+        </p>
+        <div class="stepper-vertical">
+            <div class="step-item">
+                <div class="step-icon step-success"><i class="fa-solid fa-check"></i></div>
+                <div class="step-content">
+                    <h4>Tahap 1: Data Gathering (Selesai)</h4>
+                    <p>AI mengekstrak dan memuat konten teks CV Anda (<strong>{{ filename }}</strong>) serta mencocokkannya secara real-time dengan <strong>73 peran karir industri</strong> di database kami.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-icon step-success"><i class="fa-solid fa-check"></i></div>
+                <div class="step-content">
+                    <h4>Tahap 2: Text Preprocessing (Selesai)</h4>
+                    <p>Melakukan pembersihan karakter non-alphanumeric, menghapus angka, spasi berlebih, serta menyeragamkan ke huruf kecil (Case Folding) agar kata kunci terekstraksi secara konsisten.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-icon step-success"><i class="fa-solid fa-check"></i></div>
+                <div class="step-content">
+                    <h4>Tahap 3: Feature Extraction (Selesai)</h4>
+                    <p>Mengubah teks CV menjadi representasi vektor numerik berbasis <strong>TF-IDF n-gram</strong>. Bobot kata kunci terpenting yang dideteksi di CV Anda adalah: 
+                        <strong style="color: var(--primary);">{{ keywords | join(', ') }}</strong>.
+                    </p>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-icon step-success"><i class="fa-solid fa-check"></i></div>
+                <div class="step-content">
+                    <h4>Tahap 4: Semantic Modeling - Latent Semantic Analysis (Selesai)</h4>
+                    <p>Menerapkan kompresi dimensi **SVD (Singular Value Decomposition)** untuk menangkap kesamaan konteks semantik (sinonim) dan mengukur kecocokan menggunakan **Cosine Similarity**.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-icon step-success"><i class="fa-solid fa-check"></i></div>
+                <div class="step-content">
+                    <h4>Tahap 5: Expert System Scorer (Selesai)</h4>
+                    <p>Mengevaluasi profesionalitas CV, memindai keberadaan **Action Verbs** (ditemukan: <strong>{{ quality.verb_count }} kata kerja aktif</strong>), metrik pencapaian (ditemukan: <strong>{{ quality.metric_count }} metrik kuantitatif</strong>), serta profil Soft Skills Anda.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- ── Body ──────────────────────────────────────────────────── -->
-<div class="result-body">
-
-  <!-- ── Main Column ──────────────────────────────────────────── -->
-  <div class="result-main">
-
-    <!-- Stat Cards -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <span class="stat-card-num text-orange">{{ r.average_rating }}</span>
-        <div class="stars">
-          {% set full = r.average_rating | int %}
-          {% for i in range(full) %}★{% endfor %}
-          {% for i in range(5 - full) %}☆{% endfor %}
+<!-- IDE A: CV Quality Scorer & Soft Skill Profiling -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="quality-card" style="margin-bottom: 0;">
+        <div class="score-circle">
+            <span class="score-number">{{ quality.score }}</span>
+            <span class="score-label">/100</span>
         </div>
-        <div class="stat-card-label">Rata-rata Rating</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-card-num" style="color:var(--green)">
-          {{ r.sentiment_pct.positive }}%
-        </span>
-        <div class="stat-card-label">Ulasan Positif</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-card-num" style="color:var(--orange)">
-          {{ r.sentiment_pct.negative }}%
-        </span>
-        <div class="stat-card-label">Ulasan Negatif</div>
-      </div>
+        <div class="quality-details">
+            <h3><i class="fa-solid fa-ranking-star" style="color: #fbbf24;"></i> Evaluasi Kualitas CV</h3>
+            <div class="quality-stats">
+                <div class="q-stat">Metrik Ditemukan: <span>{{ quality.metric_count }}</span></div>
+                <div class="q-stat">Action Verbs: <span>{{ quality.verb_count }}</span></div>
+            </div>
+            <ul class="advice-list">
+                {% for adv in quality.advice %}
+                    <li>{{ adv }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
-
-    <!-- Charts Row -->
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-title">📊 Distribusi Rating</div>
-        <img src="data:image/png;base64,{{ r.chart_rating }}" alt="Rating Chart" />
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">💬 Distribusi Sentimen</div>
-        <img src="data:image/png;base64,{{ r.chart_sentiment }}" alt="Sentiment Chart" />
-      </div>
+    
+    <div class="quality-card" style="margin-bottom: 0; flex-direction: column; align-items: flex-start; gap: 1rem;">
+        <h3 style="color: #f8fafc; font-size: 1.25rem; margin-bottom: 0;"><i class="fa-solid fa-brain" style="color: #c084fc;"></i> Profil Kepribadian (Soft Skills)</h3>
+        <p style="font-size: 0.875rem; color: #94a3b8;">Berdasarkan pemodelan Lexicon Text-Mining dari CV Anda:</p>
+        
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 0.75rem;">
+            {% if soft_skills %}
+                {% for skill in soft_skills %}
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; border-radius: 8px;">
+                    <span style="font-weight: 600; font-size: 0.95rem; color: #e2e8f0;">{{ skill.name }}</span>
+                    {% if skill.level == 'Tinggi' %}
+                        <span style="background: #065f46; color: #34d399; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700;">Tinggi</span>
+                    {% elif skill.level == 'Menengah' %}
+                        <span style="background: #1e3a8a; color: #60a5fa; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700;">Menengah</span>
+                    {% else %}
+                        <span style="background: #78350f; color: #fbbf24; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700;">Dasar</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; color: #94a3b8; padding: 1rem;">
+                    Sistem belum berhasil mendeteksi narasi Soft Skill dari CV Anda. Cobalah menambahkan kegiatan organisasi atau pengalaman kolaborasi.
+                </div>
+            {% endif %}
+        </div>
     </div>
+</div>
 
-    <!-- Trend Chart -->
-    <div class="chart-card-full">
-      <div class="chart-title">📈 Tren Rating dari Waktu ke Waktu</div>
-      <img src="data:image/png;base64,{{ r.chart_trend }}" alt="Trend Chart" style="width:100%;height:auto" />
-    </div>
+{% if matches %}
+    <h2 style="margin-bottom: 1.5rem; color: var(--text-main);">Top 5 Kecocokan Peran (Semantic LSA Match)</h2>
+    <div class="job-list">
+        {% for match in matches %}
+        <div class="job-card">
+            
+            <!-- Kolom Kiri: Detail & Skills -->
+            <div class="job-info-col">
+                <div class="job-header">
+                    <div>
+                        <div class="job-title">{{ match.job_title }}</div>
+                        <div class="job-company">
+                            <i class="fa-solid fa-briefcase"></i> Bidang: {{ match.category }}
+                        </div>
+                    </div>
+                    <div class="match-badge">
+                        <i class="fa-solid fa-bolt"></i> {{ match.similarity_score }}% Match
+                    </div>
+                </div>
+                
+                <div class="job-desc">{{ match.description }}</div>
+                
+                <div class="skills-section">
+                    <div style="margin-bottom: 1rem;">
+                        <span class="skill-title"><i class="fa-solid fa-check-circle" style="color: var(--secondary);"></i> Keahlian Ditemukan:</span>
+                        <div>
+                            {% if match.matched_skills %}
+                                {% for skill in match.matched_skills %}
+                                    <span class="skill-badge skill-matched">{{ skill }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span style="color: var(--text-muted); font-size: 0.875rem;">- Belum ada keahlian utama yang cocok -</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <span class="skill-title"><i class="fa-solid fa-xmark-circle" style="color: #EF4444;"></i> Keahlian Kurang (Target Belajar):</span>
+                        <div>
+                            {% if match.missing_skills %}
+                                {% for skill in match.missing_skills %}
+                                    <span class="skill-badge skill-missing">{{ skill }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span style="color: var(--secondary); font-size: 0.875rem; font-weight: 500;">Sempurna! Semua keahlian inti terpenuhi.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Sistem Pakar: Improvement Advice -->
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border);">
+                        <span class="skill-title"><i class="fa-solid fa-lightbulb" style="color: #F59E0B;"></i> Saran Peningkatan dari AI:</span>
+                        <p style="font-size: 0.875rem; color: #4B5563; background-color: #FEF3C7; padding: 0.75rem; border-radius: 8px; border-left: 4px solid #F59E0B;">
+                            {{ match.improvement_advice }}
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Keywords -->
-    <div class="keywords-section">
-      <div class="chart-title">🔑 Kata Kunci Ulasan</div>
-      <div class="keywords-grid">
-        <div>
-          <div class="keyword-col-title" style="color:var(--green)">👍 Pujian Pembeli</div>
-          <div class="keyword-tags">
-            {% for kw in r.common_praises %}
-            <span class="kw-tag" style="background:#E8F8F6;color:var(--green)">{{ kw }}</span>
-            {% endfor %}
-          </div>
+            <!-- Kolom Kanan: IDE B: Radar Chart -->
+            <div class="radar-container">
+                <canvas id="radarChart-{{ loop.index }}"></canvas>
+            </div>
+            
         </div>
-        <div>
-          <div class="keyword-col-title" style="color:var(--orange)">👎 Keluhan Pembeli</div>
-          <div class="keyword-tags">
-            {% for kw in r.common_complaints %}
-            <span class="kw-tag" style="background:#FFF3F0;color:var(--orange)">{{ kw }}</span>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
-        <div class="keyword-col-title" style="color:var(--text-muted);margin-bottom:8px">
-          🔎 Semua Kata Kunci Dominan
-        </div>
-        <div class="keyword-tags">
-          {% for kw in r.top_keywords %}
-          <span class="kw-tag badge badge-orange">{{ kw }}</span>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-
-    <!-- Review Samples -->
-    <div class="reviews-section">
-      <div class="chart-title">📝 Cuplikan Ulasan Pembeli</div>
-      <div class="review-tabs">
-        <div class="rtab active" onclick="switchTab(this, 'pos-reviews')">
-          ✅ Ulasan Positif ({{ r.sentiment_counts.positive }})
-        </div>
-        <div class="rtab" onclick="switchTab(this, 'neg-reviews')">
-          ❌ Ulasan Negatif ({{ r.sentiment_counts.negative }})
-        </div>
-      </div>
-
-      <div class="review-list show" id="pos-reviews">
-        {% for rev in r.sample_positives %}
-        <div class="review-item pos">💬 {{ rev }}</div>
-        {% else %}
-        <div class="review-item">Tidak ada cuplikan ulasan positif.</div>
         {% endfor %}
-      </div>
-
-      <div class="review-list" id="neg-reviews">
-        {% for rev in r.sample_negatives %}
-        <div class="review-item neg">💬 {{ rev }}</div>
-        {% else %}
-        <div class="review-item">Tidak ada cuplikan ulasan negatif.</div>
-        {% endfor %}
-      </div>
     </div>
-
-  </div><!-- /result-main -->
-
-  <!-- ── Sidebar ───────────────────────────────────────────────── -->
-  <div class="result-side">
-
-    <!-- Sentiment breakdown -->
-    <div class="sidebar-card">
-      <div class="sidebar-title">💬 Rincian Sentimen</div>
-      <div class="sentiment-bar-row">
-        <div class="sentiment-bar-label" style="color:var(--green)">✅ Positif</div>
-        <div class="sentiment-bar-track">
-          <div class="sentiment-bar-fill" style="width:{{ r.sentiment_pct.positive }}%;background:var(--green)"></div>
-        </div>
-        <div class="sentiment-bar-pct">{{ r.sentiment_pct.positive }}%</div>
-      </div>
-      <div class="sentiment-bar-row">
-        <div class="sentiment-bar-label" style="color:var(--yellow)">➖ Netral</div>
-        <div class="sentiment-bar-track">
-          <div class="sentiment-bar-fill" style="width:{{ r.sentiment_pct.neutral }}%;background:var(--yellow)"></div>
-        </div>
-        <div class="sentiment-bar-pct">{{ r.sentiment_pct.neutral }}%</div>
-      </div>
-      <div class="sentiment-bar-row">
-        <div class="sentiment-bar-label" style="color:var(--orange)">❌ Negatif</div>
-        <div class="sentiment-bar-track">
-          <div class="sentiment-bar-fill" style="width:{{ r.sentiment_pct.negative }}%;background:var(--orange)"></div>
-        </div>
-        <div class="sentiment-bar-pct">{{ r.sentiment_pct.negative }}%</div>
-      </div>
+{% else %}
+    <div class="empty-state" style="text-align: center; padding: 4rem;">
+        <h2>Tidak Ada Kecocokan Signifikan</h2>
+        <p>Format CV mungkin tidak terbaca oleh sistem kami.</p>
     </div>
+{% endif %}
+{% endblock %}
 
-    <!-- Rating breakdown -->
-    <div class="sidebar-card">
-      <div class="sidebar-title">⭐ Rincian Rating</div>
-      {% set total = r.total_reviews %}
-      {% for star in [5,4,3,2,1] %}
-      {% set cnt = r.rating_distribution[star] %}
-      {% set pct = (cnt / total * 100) | round(0) | int %}
-      <div class="rating-row">
-        <div class="rating-row-star">{{ star }}★</div>
-        <div class="rating-bar-wrap">
-          <div class="rating-bar-inner" style="width:{{ pct }}%"></div>
-        </div>
-        <div class="rating-row-count">{{ cnt }}</div>
-      </div>
-      {% endfor %}
-    </div>
-
-    <!-- Info card -->
-    <div class="sidebar-card">
-      <div class="sidebar-title">ℹ️ Info Analisis</div>
-      <div style="font-size:13px;display:flex;flex-direction:column;gap:8px;color:var(--text-muted)">
-        <div>📊 <strong>{{ r.total_reviews }}</strong> ulasan dianalisis</div>
-        <div>🤖 Model: Lexicon-Based NLP</div>
-        <div>🌐 Bahasa: Bahasa Indonesia</div>
-        <div>📅 {{ r.generated_at }}</div>
-      </div>
-      <div class="url-display">{{ r.product_url }}</div>
-    </div>
-
-    <!-- Action -->
-    <div class="sidebar-card" style="text-align:center">
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">
-        Ingin menganalisis produk lain?
-      </p>
-      <a href="/analisis" class="btn btn-primary" style="width:100%;justify-content:center">
-        🔍 Analisis Produk Baru
-      </a>
-    </div>
-
-  </div><!-- /result-side -->
-
-</div><!-- /result-body -->
-
+{% block extra_js %}
+{% if matches %}
 <script>
-function switchTab(el, targetId) {
-  document.querySelectorAll(".rtab").forEach(t => t.classList.remove("active"));
-  document.querySelectorAll(".review-list").forEach(l => l.classList.remove("show"));
-  el.classList.add("active");
-  document.getElementById(targetId).classList.add("show");
-}
-</script>
+    // Konfigurasi standar untuk Radar Chart (Ide B)
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.raw >= 10 ? "Dikuasai" : "Perlu Dipelajari";
+                    }
+                }
+            }
+        },
+        scales: {
+            r: {
+                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                pointLabels: {
+                    font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+                    color: '#4B5563'
+                },
+                ticks: { display: false, max: 10, min: 0 }
+            }
+        }
+    };
 
+    // Render chart untuk setiap kecocokan
+    {% for match in matches %}
+    new Chart(document.getElementById('radarChart-{{ loop.index }}'), {
+        type: 'radar',
+        data: {
+            labels: {{ match.radar_labels | tojson | safe }},
+            datasets: [{
+                label: 'Kuasai Skill',
+                data: {{ match.radar_data | tojson | safe }},
+                backgroundColor: 'rgba(16, 185, 129, 0.2)', // Emerald color
+                borderColor: 'rgba(16, 185, 129, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+            }]
+        },
+        options: chartOptions
+    });
+    {% endfor %}
+
+    // Fungsi Toggle untuk Accordion Laporan Pipeline
+    function togglePipelineReport() {
+        const body = document.getElementById('pipelineReportBody');
+        const icon = document.getElementById('pipeline-toggle-icon');
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            icon.innerHTML = '<i class="fa-solid fa-chevron-up"></i> Sembunyikan';
+        } else {
+            body.style.display = 'none';
+            icon.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Tampilkan Detail';
+        }
+    }
+</script>
+{% endif %}
 {% endblock %}

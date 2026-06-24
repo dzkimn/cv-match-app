@@ -6,27 +6,29 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-
 # ── Stage 2: Runtime ──────────────────────────────────────────────
 FROM python:3.11-slim AS runtime
 
 LABEL maintainer="PASD Praktikum - Telkom University"
-LABEL description="ShopeeSentiment — Analisis Sentimen Ulasan Shopee"
-LABEL version="2.0"
+LABEL description="CV-Match AI — Semantic CV Profiling & Job Matcher"
+LABEL version="1.0"
 
 WORKDIR /app
 
 # Copy installed packages
 COPY --from=builder /install /usr/local
 
-# Copy source code
-COPY app.py             ./app.py
-COPY sentiment_engine.py ./sentiment_engine.py
-COPY templates/         ./templates/
-COPY static/            ./static/
-COPY Shopee_Sampled_Reviews.csv ./Shopee_Sampled_Reviews.csv
+# Create uploads directory
+RUN mkdir -p /app/uploads
 
-# Non-root user
+# Copy source code
+COPY app.py                 ./app.py
+COPY cv_engine.py           ./cv_engine.py
+COPY generate_jobs.py       ./generate_jobs.py
+COPY job_roles_dataset.csv  ./job_roles_dataset.csv
+COPY templates/             ./templates/
+
+# Set ownership to non-root user
 RUN adduser --disabled-password --gecos "" appuser && \
     chown -R appuser:appuser /app
 USER appuser
