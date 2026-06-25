@@ -90,7 +90,17 @@ jobs_data = [
     # Operations
     {"role": "Customer Success Specialist", "category": "Operations", "desc": "Membantu pelanggan mencapai hasil maksimal dengan produk perusahaan.", "skills": "Customer Service, Communication, Problem Solving, CRM, Empathy"},
     {"role": "Supply Chain Analyst", "category": "Operations", "desc": "Menganalisis dan mengoptimalkan logistik dan rantai pasokan.", "skills": "Supply Chain Management, Logistics, Excel, Data Analysis, Inventory Management"},
-    {"role": "Operations Manager", "category": "Operations", "desc": "Mengawasi jalannya operasional harian perusahaan agar berjalan efisien dan produktif.", "skills": "Operations Management, Budgeting, Leadership, Process Improvement, Business Strategy"}
+    {"role": "Operations Manager", "category": "Operations", "desc": "Mengawasi jalannya operasional harian perusahaan agar berjalan efisien dan produktif.", "skills": "Operations Management, Budgeting, Leadership, Process Improvement, Business Strategy"},
+
+    # Non-IT: Pendidikan, Kesehatan, Administrasi, Bisnis (Ekspansi Baru)
+    {"role": "Guru / Pendidik", "category": "Education", "desc": "Merancang media pembelajaran dan kurikulum untuk siswa.", "skills": "Teaching, Communication, Lesson Planning, Mentoring, Kurikulum, Edukasi"},
+    {"role": "Dosen / Akademisi", "category": "Education", "desc": "Mengajar dan melakukan penelitian di tingkat perguruan tinggi.", "skills": "Research, Public Speaking, Academic Writing, Mentoring, Higher Education"},
+    {"role": "Perawat / Nurse", "category": "Healthcare", "desc": "Memberikan asuhan keperawatan dan perawatan medis kepada pasien.", "skills": "Nursing, Patient Care, Healthcare, CPR, Empathy, Medical Records"},
+    {"role": "Administrasi Perkantoran", "category": "Administration", "desc": "Mengelola dokumen, jadwal, dan kegiatan operasional kantor.", "skills": "Microsoft Office, Data Entry, Administration, Scheduling, Filing, Excel"},
+    {"role": "Customer Service Representative", "category": "Operations", "desc": "Menangani keluhan dan pertanyaan pelanggan dengan ramah.", "skills": "Customer Service, Communication, Problem Solving, Empathy, CRM"},
+    {"role": "Digital Marketing Specialist", "category": "Marketing", "desc": "Merencanakan kampanye pemasaran online.", "skills": "SEO, SEM, Social Media, Content Strategy, Google Analytics"},
+    {"role": "Human Resources (HR)", "category": "Human Resources", "desc": "Mengelola rekrutmen dan hubungan antar karyawan.", "skills": "Recruitment, Payroll, Employee Relations, Interviewing, Talent Management"},
+    {"role": "Sales Executive", "category": "Business", "desc": "Mencari prospek klien dan meningkatkan penjualan.", "skills": "Sales, Negotiation, B2B, Networking, Communication"}
 ]
 
 df = pd.DataFrame(jobs_data)
