@@ -51,6 +51,13 @@ def index():
             try:
                 result = analyzer.analyze_cv(filepath, top_n=5)
                 
+                # Cek jika ada error dari engine (misal teks gagal diekstrak)
+                if "error" in result:
+                    flash(result["error"], "error")
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
+                    return redirect(request.url)
+                
                 # Simpan ke cache
                 _cache[unique_id] = {
                     "filename": filename,
