@@ -1,5 +1,5 @@
 ---
-title: CV Match App
+title: ResuMate AI
 emoji: 🚀
 colorFrom: blue
 colorTo: green
@@ -8,9 +8,9 @@ app_port: 7860
 pinned: false
 ---
 
-# 📄 CV-Match AI — Sistem Analisis & Pencocokan Karir Berbasis NLP
+# 📄 ResuMate AI — Sistem Analisis & Pencocokan Karir Berbasis NLP
 
-CV-Match AI adalah aplikasi web cerdas berbasis Python dan Natural Language Processing (NLP) yang dirancang untuk menganalisis dokumen CV (PDF) pengguna secara otomatis dan mencocokkannya dengan berbagai peran pekerjaan industri secara semantik.
+ResuMate AI adalah aplikasi web cerdas berbasis Python dan Natural Language Processing (NLP) yang dirancang untuk menganalisis dokumen CV (PDF) pengguna secara otomatis dan mencocokkannya dengan berbagai peran pekerjaan industri secara semantik.
 
 Aplikasi ini dikembangkan untuk mata kuliah **Perancangan Aplikasi Sains Data**, Fakultas Informatika, Telkom University.
 

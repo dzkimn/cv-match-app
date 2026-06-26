@@ -1,5 +1,5 @@
 """
-cv_engine.py — Core Engine for CV-Match AI (ADVANCED VERSION)
+cv_engine.py — Core Engine for ResuMate AI (ADVANCED VERSION)
 
 ALUR PEMROSESAN DATA (DATA PIPELINE):
 [TAHAP 1] Data Gathering     : Membaca Dataset Lowongan (CSV) dan CV pengguna (PDF).
@@ -9,7 +9,7 @@ ALUR PEMROSESAN DATA (DATA PIPELINE):
 [TAHAP 5] Expert System      : Menerapkan Rule-Based NLP untuk mendeteksi Soft Skills & Kualitas CV.
 """
 
-# cv_engine.py — Core Engine for CV-Match AI (ADVANCED VERSION WITH EXTENDED FEATURES)
+# cv_engine.py — Core Engine for ResuMate AI (ADVANCED VERSION WITH EXTENDED FEATURES)
 
 import os, re
 import PyPDF2

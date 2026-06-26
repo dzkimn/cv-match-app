@@ -1,5 +1,5 @@
 """
-app.py — CV-Match AI (Sains Data Practicum)
+app.py — ResuMate AI (Sains Data Practicum)
 """
 
 import os, uuid
@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 from cv_engine import CVAnalyzer
 
 app = Flask(__name__)
-app.secret_key = "cv-match-ai-2026-super-secret"
+app.secret_key = "resumate-ai-2026-super-secret"
 
 # Setup Upload Folder
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
