@@ -35,9 +35,10 @@ class JobMatch:
     radar_data: List[int]   
 
 class CVAnalyzer:
-    def __init__(self, dataset_path: str):
+    def __init__(self, dataset_path: str, hf_token: str = None):
         self.dataset_path = dataset_path
         self.jobs_df = pd.read_csv(dataset_path)
+        self.hf_token = hf_token or os.environ.get("HF_TOKEN")
         
         # Gabungan Stopwords Bahasa Inggris dan Bahasa Indonesia
         self.id_stopwords = ['dan', 'di', 'ke', 'dari', 'yang', 'untuk', 'pada', 'dengan', 
@@ -46,6 +47,34 @@ class CVAnalyzer:
         
         self.vectorizer = TfidfVectorizer(stop_words=custom_stopwords, lowercase=True, ngram_range=(1, 2))
         self._prepare_dataset()
+
+    def _get_sbert_embeddings(self, texts: List[str]) -> np.ndarray:
+        """Mendapatkan embedding SBERT dari Hugging Face Inference API."""
+        if not self.hf_token:
+            return None
+        
+        api_url = "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        headers = {"Authorization": f"Bearer {self.hf_token}"}
+        
+        import requests
+        import time
+        try:
+            response = requests.post(api_url, headers=headers, json={"inputs": texts}, timeout=25)
+            if response.status_code == 200:
+                embeddings = response.json()
+                if isinstance(embeddings, list) and len(embeddings) > 0:
+                    return np.array(embeddings)
+            elif response.status_code == 503:
+                # Model loading, tunggu 5 detik dan coba lagi
+                time.sleep(5)
+                response = requests.post(api_url, headers=headers, json={"inputs": texts}, timeout=25)
+                if response.status_code == 200:
+                    embeddings = response.json()
+                    if isinstance(embeddings, list) and len(embeddings) > 0:
+                        return np.array(embeddings)
+        except Exception as e:
+            pass
+        return None
 
     def _prepare_dataset(self):
         self.jobs_df['corpus'] = self.jobs_df['role'] + " " + \
@@ -60,6 +89,14 @@ class CVAnalyzer:
         
         self.lsa_model = TruncatedSVD(n_components=n_comp, random_state=42)
         self.job_semantic = self.lsa_model.fit_transform(self.job_tfidf)
+        
+        # Pre-calculate SBERT embeddings untuk seluruh lowongan kerja
+        self.job_sbert = None
+        if self.hf_token:
+            corpora = self.jobs_df['corpus'].fillna("").tolist()
+            embeddings = self._get_sbert_embeddings(corpora)
+            if embeddings is not None:
+                self.job_sbert = embeddings
 
     def extract_text_from_pdf(self, pdf_path: str) -> str:
         text = ""
@@ -280,11 +317,30 @@ class CVAnalyzer:
         tailor_suggestions = self.generate_resume_tailor_suggestions(cv_text)
         soft_skills_report = self.extract_soft_skills(cv_text)
 
-        # Proses Vektor Semantik (LSA)
+        # Proses Vektor Semantik (LSA & SBERT Hybrid)
         cv_tfidf = self.vectorizer.transform([cv_text])
         cv_semantic = self.lsa_model.transform(cv_tfidf)
         
-        similarities = cosine_similarity(cv_semantic, self.job_semantic)[0]
+        # 1. Hitung similarity menggunakan TF-IDF (Leksikal)
+        tfidf_sim = cosine_similarity(cv_tfidf, self.job_tfidf)[0]
+        
+        # 2. Hubungi SBERT API jika memungkinkan
+        sbert_sim = None
+        if self.job_sbert is not None:
+            cv_sbert = self._get_sbert_embeddings([cv_text])
+            if cv_sbert is not None:
+                sbert_sim = cosine_similarity(cv_sbert, self.job_sbert)[0]
+        
+        # 3. Hitung skor akhir hibrida atau fallback ke LSA
+        if sbert_sim is not None:
+            # Formula hibrida: 40% TF-IDF (Exact Match) + 60% SBERT (Contextual Semantics)
+            similarities = 0.4 * tfidf_sim + 0.6 * sbert_sim
+            is_hybrid = True
+        else:
+            # Fallback ke LSA klasik jika SBERT offline
+            similarities = cosine_similarity(cv_semantic, self.job_semantic)[0]
+            is_hybrid = False
+        
         top_indices = similarities.argsort()[-top_n:][::-1]
         
         matches = []
@@ -293,7 +349,10 @@ class CVAnalyzer:
         
         for idx in top_indices:
             raw_score = float(similarities[idx])
-            score = max(0.0, min(100.0, (raw_score * 100) + 15))
+            if is_hybrid:
+                score = max(0.0, min(100.0, (raw_score * 100) + 10))
+            else:
+                score = max(0.0, min(100.0, (raw_score * 100) + 15))
                 
             row = self.jobs_df.iloc[idx]
             primary_category = str(row['category'])
