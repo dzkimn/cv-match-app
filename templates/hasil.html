@@ -428,6 +428,74 @@
     </div>
 </div>
 
+<!-- CV Parser & Market Insights Section -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Column 1: CV Parser Info -->
+    <div class="quality-card" style="margin-bottom: 0; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: var(--radius-lg); padding: 1.75rem; flex-direction: column; align-items: flex-start; gap: 1.25rem;">
+        <h3 style="color: #f8fafc; font-size: 1.25rem; margin-bottom: 0;"><i class="fa-solid fa-address-card" style="color: #38bdf8;"></i> Hasil Ekstraksi Profil (Resume Parser)</h3>
+        <p style="font-size: 0.875rem; color: #94a3b8; margin-top: -0.5rem;">Informasi identitas yang berhasil dipindai dari teks CV Anda:</p>
+        
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.05); padding: 0.75rem 1rem; border-radius: 8px;">
+                <i class="fa-solid fa-envelope" style="color: #38bdf8; font-size: 1.1rem; width: 20px;"></i>
+                <div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">Email</div>
+                    <div style="font-weight: 600; color: #e2e8f0; font-size: 0.95rem;">{{ parsed_profile.email }}</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.05); padding: 0.75rem 1rem; border-radius: 8px;">
+                <i class="fa-solid fa-phone" style="color: #34d399; font-size: 1.1rem; width: 20px;"></i>
+                <div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">Nomor Telepon</div>
+                    <div style="font-weight: 600; color: #e2e8f0; font-size: 0.95rem;">{{ parsed_profile.phone }}</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.05); padding: 0.75rem 1rem; border-radius: 8px;">
+                <i class="fa-solid fa-university" style="color: #fbbf24; font-size: 1.1rem; width: 20px;"></i>
+                <div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">Institusi / Kampus</div>
+                    <div style="font-weight: 600; color: #e2e8f0; font-size: 0.95rem; text-transform: capitalize;">{{ parsed_profile.institution }}</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.05); padding: 0.75rem 1rem; border-radius: 8px;">
+                <i class="fa-solid fa-graduation-cap" style="color: #a78bfa; font-size: 1.1rem; width: 20px;"></i>
+                <div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">Program Studi / Jurusan</div>
+                    <div style="font-weight: 600; color: #e2e8f0; font-size: 0.95rem; text-transform: capitalize;">{{ parsed_profile.major }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 2: Market Insights Dashboard -->
+    <div class="quality-card" style="margin-bottom: 0; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: var(--radius-lg); padding: 1.75rem; flex-direction: column; align-items: flex-start; gap: 1rem;">
+        <h3 style="color: #f8fafc; font-size: 1.25rem; margin-bottom: 0;"><i class="fa-solid fa-chart-line" style="color: #34d399;"></i> Tren Skill Industri (Market Insights)</h3>
+        <p style="font-size: 0.875rem; color: #94a3b8; margin-top: -0.5rem;">Skill yang paling dicari untuk kategori <strong>{{ market_insights.category }}</strong>:</p>
+        
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 0.6rem; overflow-y: auto; max-height: 250px;">
+            {% if market_insights.top_skills %}
+                {% for skill, count in market_insights.top_skills.items() %}
+                <div style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 2px;">
+                        <span>{{ skill }}</span>
+                        <span style="color: #38bdf8; font-weight: 700;">{{ count }} Lowongan</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                        {% set max_count = market_insights.top_skills.values() | list | max %}
+                        {% set pct = (count / max_count) * 100 if max_count > 0 else 0 %}
+                        <div style="width: {{ pct }}%; height: 100%; background: linear-gradient(90deg, #34d399, #38bdf8); border-radius: 3px;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; color: #94a3b8; padding: 2rem;">
+                    Data tren pasar kerja tidak tersedia.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 {% if matches %}
     <h2 style="margin-bottom: 1.5rem; color: var(--text-main);">Top 5 Kecocokan Peran (Semantic LSA Match)</h2>
     <div class="job-list">
@@ -495,6 +563,73 @@
         </div>
         {% endfor %}
     </div>
+
+<!-- AI Resume Tailor & Interview Simulator Section -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 3rem; margin-bottom: 2rem;">
+    <!-- Card 1: AI Resume Tailor -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem;">
+        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary);"></i> AI Resume Tailor (Saran Struktur Kalimat)
+        </h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: -0.5rem;">
+            Saran penulisan deskripsi kegiatan untuk meningkatkan daya tarik CV Anda di mata perekrut:
+        </p>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% if tailor_suggestions %}
+                {% for sug in tailor_suggestions %}
+                <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 1rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #EF4444; margin-bottom: 0.25rem; text-transform: uppercase;">
+                        🔴 Kalimat Lemah / Pasif Anda:
+                    </div>
+                    <div style="font-size: 0.9rem; color: #475569; font-style: italic; margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 2px solid #EF4444;">
+                        "{{ sug.weak_phrase }}"
+                    </div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.25rem; text-transform: uppercase;">
+                        🟢 Rekomendasi Hasil Kerja Aktif (Formula X-Y-Z):
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--text-main); font-weight: 500; padding-left: 0.5rem; border-left: 2px solid var(--secondary);">
+                        {{ sug.recommended_transformation }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    Kalimat deskripsi CV Anda sudah berorientasi hasil yang baik!
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Card 2: Predictive Interview Simulator -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem;">
+        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-clipboard-question" style="color: #8B5CF6;"></i> Simulator Pertanyaan Wawancara (Teknis & Perilaku)
+        </h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: -0.5rem;">
+            Simulasi pertanyaan wawancara untuk mempersiapkan diri berdasarkan skill-gap yang diidentifikasi:
+        </p>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% if interview_prep %}
+                {% for q in interview_prep %}
+                <div style="display: flex; gap: 1rem; align-items: flex-start; background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: 8px; padding: 1rem;">
+                    <div style="background: #8B5CF6; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
+                        Q{{ loop.index }}
+                    </div>
+                    <div style="font-size: 0.9rem; color: #4C1D95; font-weight: 500; line-height: 1.5; padding-top: 2px;">
+                        {{ q }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    Tidak ada pertanyaan terkustomisasi yang tersedia.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% else %}
     <div class="empty-state" style="text-align: center; padding: 4rem;">
         <h2>Tidak Ada Kecocokan Signifikan</h2>

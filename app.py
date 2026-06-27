@@ -64,7 +64,11 @@ def index():
                     "matches": result.get("matches", []),
                     "quality": result.get("quality", {}),
                     "soft_skills": result.get("soft_skills", []),
-                    "keywords": result.get("keywords", [])
+                    "keywords": result.get("keywords", []),
+                    "parsed_profile": result.get("parsed_profile", {}),
+                    "tailor_suggestions": result.get("tailor_suggestions", []),
+                    "interview_prep": result.get("interview_prep", []),
+                    "market_insights": result.get("market_insights", {})
                 }
                 
                 # Hapus file PDF setelah diproses
@@ -92,7 +96,11 @@ def result(session_id):
                            matches=data['matches'],
                            quality=data['quality'],
                            soft_skills=data['soft_skills'],
-                           keywords=data['keywords'])
+                           keywords=data['keywords'],
+                           parsed_profile=data.get('parsed_profile', {}),
+                           tailor_suggestions=data.get('tailor_suggestions', []),
+                           interview_prep=data.get('interview_prep', []),
+                           market_insights=data.get('market_insights', {}))
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
